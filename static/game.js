@@ -1,64 +1,73 @@
 let canvas = document.getElementById("game");
 let ctx = canvas.getContext("2d");
 
-let player = {x:200,y:550,size:20};
-let hearts=[];
-let score=0;
-let running=false;
+let player = { x: 180, y: 550, size: 20 };
+let hearts = [];
+let score = 0;
+let running = false;
 
-function startGame(){
-  running=true;
-  score=0;
-  hearts=[];
-  document.getElementById("msg").innerText="Viel Glück Sara 💜";
+// Oyunu başlat
+function startGame() {
+    running = true;
+    score = 0;
+    hearts = [];
+    document.getElementById("msg").innerText = "Viel Glück! 💜";
+    update();
 }
 
-function spawnHeart(){
-  hearts.push({
-    x:Math.random()*380,
-    y:0,
-    size:15
-  });
+// Kalp oluştur
+function spawnHeart() {
+    hearts.push({
+        x: Math.random() * (canvas.width - 20),
+        y: 0,
+        size: 15
+    });
 }
 
-setInterval(()=>{
-  if(running) spawnHeart();
-},1000);
+setInterval(() => {
+    if (running) spawnHeart();
+}, 1000);
 
-function update(){
-  if(!running) return;
+// Oyun döngüsü
+function update() {
+    if (!running) return;
 
-  ctx.clearRect(0,0,400,600);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle="pink";
-  ctx.fillRect(player.x,player.y,player.size,player.size);
+    // Player çiz
+    ctx.fillStyle = "pink";
+    ctx.fillRect(player.x, player.y, player.size, player.size);
 
-  hearts.forEach(h=>{
-    h.y+=3;
-    ctx.fillRect(h.x,h.y,h.size,h.size);
+    // Kalpleri çiz ve kontrol et
+    hearts.forEach((h, i) => {
+        h.y += 3;
+        ctx.fillRect(h.x, h.y, h.size, h.size);
 
-    if(Math.abs(h.x-player.x)<20 && Math.abs(h.y-player.y)<20){
-      score++;
-      document.getElementById("msg").innerText =
-        "Score: " + score + " | Beste Schwester 💜";
-    }
-  });
+        if (
+            h.x < player.x + player.size &&
+            h.x + h.size > player.x &&
+            h.y < player.y + player.size &&
+            h.y + h.size > player.y
+        ) {
+            hearts.splice(i, 1);
+            score++;
+            document.getElementById("msg").innerText =
+                "Score: " + score + " 💜";
+        }
+    });
 
-  requestAnimationFrame(update);
+    requestAnimationFrame(update);
 }
 
-update();
-
-canvas.addEventListener("mousemove",(e)=>{
-  const rect = canvas.getBoundingClientRect();
-  const x = (e.clientX - rect.left) * (400 / rect.width);
-  player.x = Math.max(0, Math.min(380, x));
+// Mouse kontrol
+canvas.addEventListener("mousemove", function(e) {
+    const rect = canvas.getBoundingClientRect();
+    player.x = e.clientX - rect.left - player.size / 2;
 });
 
-canvas.addEventListener("touchmove", (e) => {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  const x = (touch.clientX - rect.left) * (400 / rect.width);
-  player.x = Math.max(0, Math.min(380, x));
-}, { passive: false });
+// Touch kontrol
+canvas.addEventListener("touchmove", function(e) {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    player.x = e.touches[0].clientX - rect.left - player.size / 2;
+});
