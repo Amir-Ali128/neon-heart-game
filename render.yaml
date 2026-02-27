@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: neurovision-ai
+    env: docker
+    plan: free
+    autoDeploy: true
